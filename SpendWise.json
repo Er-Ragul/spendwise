@@ -1,0 +1,956 @@
+{
+  "name": "SpendWise",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "signup",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -432,
+        -128
+      ],
+      "id": "e16e1dd3-c066-45bf-8e8f-2a0a886c02e9",
+      "name": "signup",
+      "webhookId": "bfd4f8f1-bde8-411c-ae9e-0bc22e04a956"
+    },
+    {
+      "parameters": {
+        "value": "={{ $json.body.password }}",
+        "dataPropertyName": "password"
+      },
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        -128
+      ],
+      "id": "1011cc35-0b2a-4296-ae7a-494a7ece52b6",
+      "name": "encrypt"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"success\",\n  \"auth\": true,\n  \"message\": \"signup success\"\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        400,
+        -128
+      ],
+      "id": "f4878bdc-1fab-4444-80a7-ac276e2bf34f",
+      "name": "response"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"status\": \"success\",\n  \"auth\": true,\n  \"token\": \"{{ $json.token }}\",\n  \"message\": \"logged in successfully\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        2080,
+        -192
+      ],
+      "id": "0ab92932-c327-479b-8821-77baa322a2c5",
+      "name": "true_response"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "56847883-e0fe-446d-877c-554d14e5084b",
+              "leftValue": "={{ $json.password }}",
+              "rightValue": "={{ $('decrypt').item.json.password }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1648,
+        -96
+      ],
+      "id": "c469a4ef-2f2c-4557-a9a6-52ab2ee84c6e",
+      "name": "if"
+    },
+    {
+      "parameters": {
+        "collection": "users",
+        "options": {},
+        "query": "={\n  \"email\": \"{{ $json.body.email }}\"\n}"
+      },
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.2,
+      "position": [
+        1440,
+        -96
+      ],
+      "id": "d01ad2b7-dedf-4e85-b739-aba78747f03c",
+      "name": "read",
+      "credentials": {
+        "mongoDb": {
+          "id": "4y42pwHjglLwHn0C",
+          "name": "MongoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "value": "={{ $json.body.password }}",
+        "dataPropertyName": "password"
+      },
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        1232,
+        -96
+      ],
+      "id": "871d9820-0c75-4e0e-bf87-3b7ada02246f",
+      "name": "decrypt"
+    },
+    {
+      "parameters": {
+        "useJson": true,
+        "claimsJson": "={\n  \"id\": \"{{ $('read').item.json._id }}\",\n  \"name\": \"{{ $('read').item.json.name }}\",\n  \"email\": \"{{ $('read').item.json.email }}\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.jwt",
+      "typeVersion": 1,
+      "position": [
+        1872,
+        -192
+      ],
+      "id": "f12b9c72-87cd-4da2-836b-72782ded7db2",
+      "name": "sign",
+      "credentials": {
+        "jwtAuth": {
+          "id": "BR22Yi4dDM4Bstph",
+          "name": "JWT Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"status\": \"failed\",\n  \"auth\": false,\n  \"message\": \"login failed\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1872,
+        0
+      ],
+      "id": "f7e24c94-6390-42af-ad71-9f7a2d6206e4",
+      "name": "false_response"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "login",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        1024,
+        -96
+      ],
+      "id": "c87d3a3b-8317-40d5-9e55-95bd10a926ed",
+      "name": "login",
+      "webhookId": "c25e4e57-7243-4552-8b53-be77d5e39661"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "auth",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -192,
+        496
+      ],
+      "id": "fa800458-313d-4391-aa34-68785d0f54ea",
+      "name": "auth",
+      "webhookId": "05775a40-c381-4d85-8ce8-5243350bc845"
+    },
+    {
+      "parameters": {
+        "operation": "verify",
+        "token": "={{ $json.body.token }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.jwt",
+      "typeVersion": 1,
+      "position": [
+        16,
+        496
+      ],
+      "id": "54d5a9c3-ad2b-4f69-9c52-5467e6879d67",
+      "name": "verify",
+      "alwaysOutputData": true,
+      "credentials": {
+        "jwtAuth": {
+          "id": "BR22Yi4dDM4Bstph",
+          "name": "JWT Auth account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"status\": \"success\",\n  \"auth\": true,\n  \"message\": \"authenticated successfully\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        448,
+        400
+      ],
+      "id": "8c9cfb0c-bd69-46fa-87b5-05e8d1735a80",
+      "name": "auth_true_response"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"status\": \"failed\",\n  \"auth\": false,\n  \"message\": \"authentication failed\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        448,
+        592
+      ],
+      "id": "fef75d57-4ee9-4634-a9d4-067d0af68408",
+      "name": "auth_false_response"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "93d5e019-ba94-497b-9f28-17495cd83122",
+              "leftValue": "={{ $json.payload.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        496
+      ],
+      "id": "59c6000a-efd6-48b8-9d2f-9e505625f483",
+      "name": "auth_if"
+    },
+    {
+      "parameters": {
+        "content": "## Login",
+        "height": 288,
+        "width": 1328,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        -224
+      ],
+      "id": "7fa781e9-c486-446f-86b9-6afec6234418",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Signup",
+        "height": 384,
+        "width": 1328,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        928,
+        -224
+      ],
+      "id": "b6e088c4-a390-45a7-a7e2-723413475ca4",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Authentication",
+        "height": 384,
+        "width": 1024,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        352
+      ],
+      "id": "e034ad03-c416-4ddc-a9e6-4f10c7ef7783",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "income",
+        "authentication": "jwtAuth",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        1088,
+        464
+      ],
+      "id": "40187c6e-5a6f-47bc-8323-ca94c20cd928",
+      "name": "income",
+      "webhookId": "5503c5ea-80b5-4885-846b-7442fb1d5436",
+      "credentials": {
+        "jwtAuth": {
+          "id": "BR22Yi4dDM4Bstph",
+          "name": "JWT Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"success\",\n  \"auth\": true,\n  \"message\": \"income recorded successfully\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1728,
+        464
+      ],
+      "id": "d7a3a463-a701-475e-a037-925bbf7d7ba4",
+      "name": "income_response"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"name\": \"{{ $json.body.name }}\",\n  \"email\": \"{{ $json.body.email }}\",\n  \"password\": \"{{ $json.password }}\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -16,
+        -128
+      ],
+      "id": "71ef60a7-5c23-4fed-98e0-b8b7042201cb",
+      "name": "login_json"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"amount\": \"{{ $json.body.amount }}\",\n  \"date\": \"{{ $json.body.date }}\",\n  \"time\": \"{{ $json.body.time }}\",\n  \"category\": \"{{ $json.body.category }}\",\n  \"note\": \"{{ $json.body.note }}\",\n  \"icon\": \"{{ $json.body.icon }}\",\n  \"type\": \"{{ $json.body.type }}\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1296,
+        464
+      ],
+      "id": "893cacc0-1e42-45d9-9482-5d5eca1d1dbd",
+      "name": "income_json"
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "collection": "transactions",
+        "fields": "amount,date,time,category,note,icon,type",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.2,
+      "position": [
+        1504,
+        464
+      ],
+      "id": "5cae05fe-f68f-443b-b3d8-7bba2c07dcc6",
+      "name": "write_income",
+      "credentials": {
+        "mongoDb": {
+          "id": "4y42pwHjglLwHn0C",
+          "name": "MongoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "collection": "users",
+        "fields": "name,email,password",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.2,
+      "position": [
+        192,
+        -128
+      ],
+      "id": "063657d4-4821-4a21-90fd-68581cb02e66",
+      "name": "write_login",
+      "credentials": {
+        "mongoDb": {
+          "id": "4y42pwHjglLwHn0C",
+          "name": "MongoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Income",
+        "height": 384,
+        "width": 992,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        992,
+        336
+      ],
+      "id": "e0811443-b4e1-443f-98fa-13315a65cbc2",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "expense",
+        "authentication": "jwtAuth",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -176,
+        1040
+      ],
+      "id": "f89cc8cd-1f05-4741-88e8-c9da13de649f",
+      "name": "expense",
+      "webhookId": "5503c5ea-80b5-4885-846b-7442fb1d5436",
+      "credentials": {
+        "jwtAuth": {
+          "id": "BR22Yi4dDM4Bstph",
+          "name": "JWT Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"amount\": \"{{ $json.body.amount }}\",\n  \"date\": \"{{ $json.body.date }}\",\n  \"time\": \"{{ $json.body.time }}\",\n  \"category\": \"{{ $json.body.category }}\",\n  \"note\": \"{{ $json.body.note }}\",\n  \"icon\": \"{{ $json.body.icon }}\",\n  \"type\": \"{{ $json.body.type }}\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        32,
+        1040
+      ],
+      "id": "5b375f5b-4867-45ce-b84d-1efd4ea55aed",
+      "name": "expense_json"
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "collection": "transactions",
+        "fields": "amount,date,time,category,note,icon,type",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        1040
+      ],
+      "id": "a1c2824f-a082-47d2-8cfa-8f137c0f53ab",
+      "name": "write_expense",
+      "credentials": {
+        "mongoDb": {
+          "id": "4y42pwHjglLwHn0C",
+          "name": "MongoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"success\",\n  \"auth\": true,\n  \"message\": \"income recorded successfully\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        464,
+        1040
+      ],
+      "id": "ad0713de-241d-4330-bf28-c467cd3e71df",
+      "name": "expense_response"
+    },
+    {
+      "parameters": {
+        "content": "## Expense",
+        "height": 384,
+        "width": 976,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        896
+      ],
+      "id": "e5590a97-07c5-4b5c-beb9-1946c4037ec2",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "path": "report",
+        "authentication": "jwtAuth",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        1072,
+        1024
+      ],
+      "id": "1fc1455b-834f-45e7-ad32-0176c71b67b6",
+      "name": "report",
+      "webhookId": "a1959ddd-f048-4bfa-8bcc-59f29625612f",
+      "credentials": {
+        "jwtAuth": {
+          "id": "BR22Yi4dDM4Bstph",
+          "name": "JWT Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"status\": \"success\",\n  \"auth\": true,\n  \"message\": \"query successful\",\n  \"result\": {\n    \"totalIncome\": \"{{ $json.totalIncome }}\",\n    \"totalExpense\": \"{{ $json.totalExpense }}\",\n    \"totalBalance\": \"{{ $json.totalBalance }}\",\n    \"monthlyExpense\": \"{{ $json.monthlyExpense }}\",\n    \"graph\": {{ JSON.stringify($json.graph) }},\n    \"transaction\": {{ JSON.stringify($json.transaction) }}\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1920,
+        1024
+      ],
+      "id": "050c1eab-bec9-4d52-81f9-49e5ce67c51e",
+      "name": "report_response"
+    },
+    {
+      "parameters": {
+        "operation": "aggregate",
+        "collection": "transactions",
+        "query": "[\n  {\n    \"$addFields\": {\n      \"parsedDate\": {\n        \"$dateFromString\": { \"dateString\": \"$date\", \"format\": \"%Y-%m-%d\" }\n      }\n    }\n  },\n  {\n    \"$addFields\": {\n      \"weekOfMonth\": {\n        \"$ceil\": { \"$divide\": [{ \"$dayOfMonth\": \"$parsedDate\" }, 7] }\n      }\n    }\n  },\n  {\n    \"$group\": {\n      \"_id\": null,\n      \"totalIncome\": {\n        \"$sum\": {\n          \"$cond\": [\n            { \"$eq\": [\"$type\", \"income\"] },\n            { \"$toDouble\": \"$amount\" },\n            0\n          ]\n        }\n      },\n      \"totalExpense\": {\n        \"$sum\": {\n          \"$cond\": [\n            { \"$eq\": [\"$type\", \"expense\"] },\n            { \"$toDouble\": \"$amount\" },\n            0\n          ]\n        }\n      },\n      \"weeklyExpenses\": {\n        \"$push\": {\n          \"week\": \"$weekOfMonth\",\n          \"type\": \"$type\",\n          \"amount\": { \"$toDouble\": \"$amount\" }\n        }\n      }\n    }\n  },\n  {\n    \"$addFields\": {\n      \"netBalance\": { \"$subtract\": [\"$totalIncome\", \"$totalExpense\"] },\n      \"weeklyExpenseSummary\": {\n        \"$map\": {\n          \"input\": [1, 2, 3, 4],\n          \"as\": \"week\",\n          \"in\": {\n            \"week\": \"$$week\",\n            \"totalExpense\": {\n              \"$sum\": {\n                \"$map\": {\n                  \"input\": {\n                    \"$filter\": {\n                      \"input\": \"$weeklyExpenses\",\n                      \"as\": \"exp\",\n                      \"cond\": {\n                        \"$and\": [\n                          { \"$eq\": [\"$$exp.week\", \"$$week\"] },\n                          { \"$eq\": [\"$$exp.type\", \"expense\"] }\n                        ]\n                      }\n                    }\n                  },\n                  \"as\": \"e\",\n                  \"in\": \"$$e.amount\"\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  },\n  {\n    \"$addFields\": {\n      \"monthlyExpense\": {\n        \"$sum\": {\n          \"$map\": {\n            \"input\": \"$weeklyExpenseSummary\",\n            \"as\": \"weekData\",\n            \"in\": \"$$weekData.totalExpense\"\n          }\n        }\n      }\n    }\n  },\n  {\n    \"$project\": {\n      \"_id\": 0,\n      \"totalIncome\": 1,\n      \"totalExpense\": 1,\n      \"netBalance\": 1,\n      \"monthlyExpense\": 1,\n      \"weeklyExpenseSummary\": 1\n    }\n  }\n]"
+      },
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.2,
+      "position": [
+        1296,
+        1024
+      ],
+      "id": "eb4bd51c-5b0a-4a0c-8c8b-eb9dff23f678",
+      "name": "read_transaction",
+      "credentials": {
+        "mongoDb": {
+          "id": "4y42pwHjglLwHn0C",
+          "name": "MongoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "collection": "transactions",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.2,
+      "position": [
+        1504,
+        1024
+      ],
+      "id": "4149dbd1-9fc3-437f-8a10-180caf865659",
+      "name": "read_all",
+      "credentials": {
+        "mongoDb": {
+          "id": "4y42pwHjglLwHn0C",
+          "name": "MongoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"totalIncome\": \"{{ $('read_transaction').item.json.totalIncome }}\",\n  \"totalExpense\": \"{{ $('read_transaction').item.json.totalExpense }}\",\n  \"totalBalance\": \"{{ $('read_transaction').item.json.netBalance }}\",\n  \"monthlyExpense\": \"{{ $('read_transaction').item.json.monthlyExpense }}\",\n  \"graph\": {{ $('read_transaction').item.json.weeklyExpenseSummary }},\n  \"transaction\": {{ $input.all() }}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1712,
+        1024
+      ],
+      "id": "476d26d8-70f3-42f5-840c-62c508cc1852",
+      "name": "read_json"
+    },
+    {
+      "parameters": {
+        "content": "## Report",
+        "height": 384,
+        "width": 1168,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        976,
+        896
+      ],
+      "id": "01767904-8804-4a56-9f2f-71dd19c3023b",
+      "name": "Sticky Note5"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "signup": {
+      "main": [
+        [
+          {
+            "node": "encrypt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "encrypt": {
+      "main": [
+        [
+          {
+            "node": "login_json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "if": {
+      "main": [
+        [
+          {
+            "node": "sign",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "false_response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "read": {
+      "main": [
+        [
+          {
+            "node": "if",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "decrypt": {
+      "main": [
+        [
+          {
+            "node": "read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "sign": {
+      "main": [
+        [
+          {
+            "node": "true_response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "login": {
+      "main": [
+        [
+          {
+            "node": "decrypt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "auth": {
+      "main": [
+        [
+          {
+            "node": "verify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "verify": {
+      "main": [
+        [
+          {
+            "node": "auth_if",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "auth_if": {
+      "main": [
+        [
+          {
+            "node": "auth_true_response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "auth_false_response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "income": {
+      "main": [
+        [
+          {
+            "node": "income_json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "login_json": {
+      "main": [
+        [
+          {
+            "node": "write_login",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "income_json": {
+      "main": [
+        [
+          {
+            "node": "write_income",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "write_income": {
+      "main": [
+        [
+          {
+            "node": "income_response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "write_login": {
+      "main": [
+        [
+          {
+            "node": "response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "expense": {
+      "main": [
+        [
+          {
+            "node": "expense_json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "expense_json": {
+      "main": [
+        [
+          {
+            "node": "write_expense",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "write_expense": {
+      "main": [
+        [
+          {
+            "node": "expense_response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "report": {
+      "main": [
+        [
+          {
+            "node": "read_transaction",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "read_transaction": {
+      "main": [
+        [
+          {
+            "node": "read_all",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "read_all": {
+      "main": [
+        [
+          {
+            "node": "read_json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "read_json": {
+      "main": [
+        [
+          {
+            "node": "report_response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d15c5a71-5e78-4714-982d-fc4583ec0ae6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4a854ad628bcbb5d5687b283c7b55ceddf8fffc3be5325d1154fc6a61885431b"
+  },
+  "id": "QhnSCflwdekFKIWu",
+  "tags": []
+}
