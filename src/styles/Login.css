@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+:root {
+  --brand-blue: #0A7AFF;
+  --brand-green: #34C759;
+  --brand-orange: #FF9500;
+  --base-light: #F9F9FB;
+  --base-dark: #0D1117;
+  --text-light: #1C1C1E;
+  --text-dark: #EAEAEB;
+  --gray-light: #E5E5EA;
+  --gray-dark: #3A3A3C;
+}
+body {
+  min-height: 100dvh;
+  font-family: 'Manrope', sans-serif;
+  background-color: var(--base-light);
+  min-height: max(884px, 100dvh);
+}
+.dark body {
+  background-color: var(--base-dark);
+}
+.form-input {
+  transition: all 0.2s ease-in-out;
+}
+.btn {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.1);
+}
+.btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}

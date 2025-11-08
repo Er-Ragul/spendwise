@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+body {
+    min-height: max(884px, 100dvh);
+}
+
+/* input[type="date"]::-webkit-inner-spin-button,
+input[type="date"]::-webkit-calendar-picker-indicator {
+    display: none;
+    -webkit-appearance: none;
+} */
