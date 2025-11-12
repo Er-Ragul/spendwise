@@ -18,6 +18,13 @@ let Expense = () => {
   let [note, setNote] = useState('')
 
   useEffect(() => {
+    let token = localStorage.getItem('spendwise_token')
+
+    if(token == null){
+      window.alert('⚠ Session expired. Please login')
+      navigate('/login')
+    }
+
     setDate(formattedDate())
   }, [])
 

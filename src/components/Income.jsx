@@ -15,6 +15,13 @@ let Income = () => {
   let [note, setNote] = useState('')
 
   useEffect(() => {
+    let token = localStorage.getItem('spendwise_token')
+
+    if(token == null){
+      window.alert('⚠ Session expired. Please login')
+      navigate('/login')
+    }
+
     setDate(formattedDate())
   }, [])
 
@@ -45,7 +52,7 @@ let Income = () => {
           amount, date, time, category, 
           note: note == '' ? category : note,
           icon: "trending_up", 
-          type: 'income',
+          type: 'income'
         }
 
         axios.post(`${url}/income`, data, {

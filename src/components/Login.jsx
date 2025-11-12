@@ -15,17 +15,19 @@ let Login = () => {
   useEffect(() => {
     let token = localStorage.getItem('spendwise_token')
     
-    axios.post(`${url}/auth`, { token })
-    .then((response) => {
-      console.log(response.data)
-      if(response.data.auth){
-        navigate('/')
-      }
-    })
-    .catch((error) => {
-      console.log(error);
-      window.alert('❌ Unable to reach server')
-    })
+    if(token != null){
+      axios.post(`${url}/auth`, { token })
+      .then((response) => {
+        console.log(response.data)
+        if(response.data.auth){
+          navigate('/')
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        window.alert('❌ Unable to reach server')
+      })
+    }
   },[])
 
   let logIn = (e) => {
