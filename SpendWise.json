@@ -298,7 +298,7 @@
     },
     {
       "parameters": {
-        "content": "## Login",
+        "content": "## Signup",
         "height": 288,
         "width": 1328,
         "color": 4
@@ -314,7 +314,7 @@
     },
     {
       "parameters": {
-        "content": "## Signup",
+        "content": "## Login",
         "height": 384,
         "width": 1328,
         "color": 4
@@ -418,7 +418,7 @@
     {
       "parameters": {
         "operation": "insert",
-        "collection": "transactions",
+        "collection": "={{ $('income').item.json.jwtPayload.email }}",
         "fields": "amount,date,time,category,note,icon,type",
         "options": {}
       },
@@ -519,7 +519,7 @@
     {
       "parameters": {
         "operation": "insert",
-        "collection": "transactions",
+        "collection": "={{ $('expense').item.json.jwtPayload.email }}",
         "fields": "amount,date,time,category,note,icon,type",
         "options": {}
       },
@@ -612,7 +612,7 @@
     {
       "parameters": {
         "operation": "aggregate",
-        "collection": "transactions",
+        "collection": "={{ $json.jwtPayload.email }}",
         "query": "[\n  {\n    \"$addFields\": {\n      \"parsedDate\": {\n        \"$dateFromString\": { \"dateString\": \"$date\", \"format\": \"%Y-%m-%d\" }\n      }\n    }\n  },\n  {\n    \"$addFields\": {\n      \"weekOfMonth\": {\n        \"$ceil\": { \"$divide\": [{ \"$dayOfMonth\": \"$parsedDate\" }, 7] }\n      }\n    }\n  },\n  {\n    \"$group\": {\n      \"_id\": null,\n      \"totalIncome\": {\n        \"$sum\": {\n          \"$cond\": [\n            { \"$eq\": [\"$type\", \"income\"] },\n            { \"$toDouble\": \"$amount\" },\n            0\n          ]\n        }\n      },\n      \"totalExpense\": {\n        \"$sum\": {\n          \"$cond\": [\n            { \"$eq\": [\"$type\", \"expense\"] },\n            { \"$toDouble\": \"$amount\" },\n            0\n          ]\n        }\n      },\n      \"weeklyExpenses\": {\n        \"$push\": {\n          \"week\": \"$weekOfMonth\",\n          \"type\": \"$type\",\n          \"amount\": { \"$toDouble\": \"$amount\" }\n        }\n      }\n    }\n  },\n  {\n    \"$addFields\": {\n      \"netBalance\": { \"$subtract\": [\"$totalIncome\", \"$totalExpense\"] },\n      \"weeklyExpenseSummary\": {\n        \"$map\": {\n          \"input\": [1, 2, 3, 4],\n          \"as\": \"week\",\n          \"in\": {\n            \"week\": \"$$week\",\n            \"totalExpense\": {\n              \"$sum\": {\n                \"$map\": {\n                  \"input\": {\n                    \"$filter\": {\n                      \"input\": \"$weeklyExpenses\",\n                      \"as\": \"exp\",\n                      \"cond\": {\n                        \"$and\": [\n                          { \"$eq\": [\"$$exp.week\", \"$$week\"] },\n                          { \"$eq\": [\"$$exp.type\", \"expense\"] }\n                        ]\n                      }\n                    }\n                  },\n                  \"as\": \"e\",\n                  \"in\": \"$$e.amount\"\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  },\n  {\n    \"$addFields\": {\n      \"monthlyExpense\": {\n        \"$sum\": {\n          \"$map\": {\n            \"input\": \"$weeklyExpenseSummary\",\n            \"as\": \"weekData\",\n            \"in\": \"$$weekData.totalExpense\"\n          }\n        }\n      }\n    }\n  },\n  {\n    \"$project\": {\n      \"_id\": 0,\n      \"totalIncome\": 1,\n      \"totalExpense\": 1,\n      \"netBalance\": 1,\n      \"monthlyExpense\": 1,\n      \"weeklyExpenseSummary\": 1\n    }\n  }\n]"
       },
       "type": "n8n-nodes-base.mongoDb",
@@ -632,7 +632,7 @@
     },
     {
       "parameters": {
-        "collection": "transactions",
+        "collection": "={{ $('report').item.json.jwtPayload.email }}",
         "options": {}
       },
       "type": "n8n-nodes-base.mongoDb",
@@ -946,7 +946,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "d15c5a71-5e78-4714-982d-fc4583ec0ae6",
+  "versionId": "90423aaa-194c-46a4-a1bf-65a4bda2acf6",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "4a854ad628bcbb5d5687b283c7b55ceddf8fffc3be5325d1154fc6a61885431b"
