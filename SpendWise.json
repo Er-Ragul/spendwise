@@ -316,7 +316,7 @@
       "parameters": {
         "content": "## Login",
         "height": 384,
-        "width": 1328,
+        "width": 1376,
         "color": 4
       },
       "type": "n8n-nodes-base.stickyNote",
@@ -680,6 +680,451 @@
       ],
       "id": "01767904-8804-4a56-9f2f-71dd19c3023b",
       "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Password Reset",
+        "height": 432,
+        "width": 2096,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        1920
+      ],
+      "id": "b6f57590-098e-4321-827a-87a01292fce9",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "## Request Reset",
+        "height": 432,
+        "width": 2064,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        1392
+      ],
+      "id": "08f3d945-09f4-4871-8e47-73314438a91c",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "operation": "aggregate",
+        "collection": "users",
+        "query": "=[\n  {\n    \"$match\": {\n      \"email\": \"{{ $json['E-Mail'] }}\"\n    }\n  },\n  {\n    \"$count\": \"count\"\n  },\n  {\n    \"$addFields\": {\n      \"exists\": {\n        \"$gt\": [\"$count\", 0]\n      }\n    }\n  },\n  {\n    \"$project\": {\n      \"_id\": 0,\n      \"exists\": 1\n    }\n  }\n]\n"
+      },
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.2,
+      "position": [
+        32,
+        1552
+      ],
+      "id": "eaf80717-320a-4edf-8cb6-2a04e028163e",
+      "name": "find_user",
+      "alwaysOutputData": true,
+      "credentials": {
+        "mongoDb": {
+          "id": "4y42pwHjglLwHn0C",
+          "name": "MongoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "de48a457-e57a-4ad8-b828-b2d1e4b387b5",
+              "leftValue": "={{ $json.exists }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        1552
+      ],
+      "id": "aba07c06-bc8e-4ef0-8869-265e68ea38da",
+      "name": "user_if",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "User Not Found",
+        "completionMessage": "User not found. Please enter a valid email.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.3,
+      "position": [
+        480,
+        1664
+      ],
+      "id": "9dc4de0c-b9ea-4037-baf8-6e9cc9fd42a5",
+      "name": "request_failed",
+      "webhookId": "820a221a-9971-4bc8-a809-002db77fb1f6"
+    },
+    {
+      "parameters": {
+        "value": "={{ $('reset_request').item.json.submittedAt }}"
+      },
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        480,
+        1456
+      ],
+      "id": "2891208e-cedd-4c9e-ba8f-885c22265987",
+      "name": "url"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('reset_request').item.json['E-Mail'] }}",
+        "subject": "SpendWise Password Reset",
+        "message": "=Please click the link below to reset your password.\n\nPassowrd Reset: http://192.168.31.217:5678/form/reset?token={{ $('reset_json').item.json.url }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1152,
+        1456
+      ],
+      "id": "5a8ff836-b0d8-4b0b-8e69-04e79818f44f",
+      "name": "reset_mail",
+      "webhookId": "1d6250ab-2627-458f-9abb-bfd12341fce1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "pgPqACDHPGggJ6Yh",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "Password Reset",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "E-Mail",
+              "fieldType": "email",
+              "placeholder": "Enter your Spendwise email",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false,
+          "buttonLabel": "Request Reset",
+          "path": "reset-request"
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -176,
+        1552
+      ],
+      "id": "732bb6ec-dea8-4266-b215-19392ab9ee17",
+      "name": "reset_request",
+      "webhookId": "5fb74670-a49c-4a24-8b39-2c8d4ef17992"
+    },
+    {
+      "parameters": {
+        "formTitle": "Reset Your Password",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "New Password",
+              "fieldType": "password",
+              "placeholder": "New Password",
+              "requiredField": true
+            },
+            {
+              "fieldName": "token",
+              "fieldType": "hiddenField",
+              "fieldValue": "={{ $request.query.token }}"
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {
+          "appendAttribution": false,
+          "path": "reset"
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -176,
+        2080
+      ],
+      "id": "9a7c1361-95de-4c44-926a-0db7d1f3a8cd",
+      "name": "reset_form",
+      "webhookId": "7723e55b-7833-4e01-bef0-39416448e35a"
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "collection": "reset",
+        "fields": "email, url",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.2,
+      "position": [
+        928,
+        1456
+      ],
+      "id": "63a705c1-571b-4409-b5ea-8d5f02cf1267",
+      "name": "reset_store",
+      "credentials": {
+        "mongoDb": {
+          "id": "4y42pwHjglLwHn0C",
+          "name": "MongoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"email\": \"{{ $('reset_request').item.json['E-Mail'] }}\",\n  \"url\": \"{{ $json.data }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        704,
+        1456
+      ],
+      "id": "06b972a4-b797-41c7-8d06-42188ba2ce62",
+      "name": "reset_json"
+    },
+    {
+      "parameters": {
+        "operation": "aggregate",
+        "collection": "reset",
+        "query": "=[\n  {\n    \"$match\": {\n      \"url\": \"{{ $json.token }}\"\n    }\n  },\n  {\n    \"$facet\": {\n      \"docs\": [\n        { \"$limit\": 1 }\n      ],\n      \"count\": [\n        { \"$count\": \"count\" }\n      ]\n    }\n  },\n  {\n    \"$project\": {\n      \"document\": { \"$arrayElemAt\": [\"$docs\", 0] },\n      \"exists\": {\n        \"$gt\": [\n          { \"$ifNull\": [{ \"$arrayElemAt\": [\"$count.count\", 0] }, 0] },\n          0\n        ]\n      }\n    }\n  }\n]"
+      },
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.2,
+      "position": [
+        32,
+        2080
+      ],
+      "id": "9f26a573-06bb-4baa-a562-5a535523e49e",
+      "name": "find_token",
+      "alwaysOutputData": true,
+      "credentials": {
+        "mongoDb": {
+          "id": "4y42pwHjglLwHn0C",
+          "name": "MongoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "41be0263-71de-467d-9d01-3c9a8ca096d7",
+              "leftValue": "={{ $json.exists }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        2080
+      ],
+      "id": "3ea410b5-67ad-4e29-9bb1-39156de182e0",
+      "name": "token_if"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"_id\": {{ $json._id }},\n  \"email\": \"{{ $json.email }}\",\n  \"password\": \"{{ $('encrypt_password').item.json.password }}\",\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        928,
+        1984
+      ],
+      "id": "e2204ece-f90a-46d6-96fe-26d3b3b631a5",
+      "name": "password_json"
+    },
+    {
+      "parameters": {
+        "value": "={{ $('reset_form').item.json['New Password'] }}",
+        "dataPropertyName": "password"
+      },
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        480,
+        1984
+      ],
+      "id": "6578ad5f-fa6e-47ac-9f35-98467c8d1fc1",
+      "name": "encrypt_password"
+    },
+    {
+      "parameters": {
+        "collection": "users",
+        "options": {},
+        "query": "={\n  \"email\": \"{{ $('find_token').item.json.document.email }}\"\n}"
+      },
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.2,
+      "position": [
+        704,
+        1984
+      ],
+      "id": "936a4236-507e-47a4-9e0c-a0af711c053e",
+      "name": "find_user_1",
+      "credentials": {
+        "mongoDb": {
+          "id": "4y42pwHjglLwHn0C",
+          "name": "MongoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "findOneAndUpdate",
+        "collection": "users",
+        "updateKey": "_id",
+        "fields": "password",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.2,
+      "position": [
+        1152,
+        1984
+      ],
+      "id": "8c59e80b-1027-4891-a103-e3b1179aeb1c",
+      "name": "update_password",
+      "credentials": {
+        "mongoDb": {
+          "id": "4y42pwHjglLwHn0C",
+          "name": "MongoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "Password Reset Success",
+        "completionMessage": "Your password has been reset successfully.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.3,
+      "position": [
+        1600,
+        1984
+      ],
+      "id": "5a511ac2-4eb7-4302-aa38-a8e4de05375d",
+      "name": "update_success",
+      "webhookId": "ea368a4b-dfa5-4ae2-a519-b22312d8477c"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "Invalid URL",
+        "completionMessage": "The link appears to be invalid. Please try again or request a new one.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.3,
+      "position": [
+        480,
+        2176
+      ],
+      "id": "7901aae3-c0bf-42ad-871b-562ca3ddbe28",
+      "name": "update_failed",
+      "webhookId": "207907ad-a2df-4099-bd90-d57138dffb11"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "Reset Your Password",
+        "completionMessage": "We’ve sent a password reset link to your email. Kindly use it to reset your password.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.3,
+      "position": [
+        1376,
+        1456
+      ],
+      "id": "e2a94cc5-6749-4828-8e53-bebef430860b",
+      "name": "request_success",
+      "webhookId": "ca0c020d-ef58-467d-80d8-a6ae00381f8f"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "collection": "reset",
+        "query": "={\n  \"email\": \"{{ $('find_token').item.json.document.email }}\"\n}"
+      },
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.2,
+      "position": [
+        1376,
+        1984
+      ],
+      "id": "33c56faa-15f4-4a9b-ae41-05774ae1a78d",
+      "name": "delete_url",
+      "credentials": {
+        "mongoDb": {
+          "id": "4y42pwHjglLwHn0C",
+          "name": "MongoDB account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -940,13 +1385,197 @@
           }
         ]
       ]
+    },
+    "expense_response": {
+      "main": [
+        []
+      ]
+    },
+    "find_user": {
+      "main": [
+        [
+          {
+            "node": "user_if",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "user_if": {
+      "main": [
+        [
+          {
+            "node": "url",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "request_failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "url": {
+      "main": [
+        [
+          {
+            "node": "reset_json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "reset_mail": {
+      "main": [
+        [
+          {
+            "node": "request_success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "reset_request": {
+      "main": [
+        [
+          {
+            "node": "find_user",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "reset_store": {
+      "main": [
+        [
+          {
+            "node": "reset_mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "reset_json": {
+      "main": [
+        [
+          {
+            "node": "reset_store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "reset_form": {
+      "main": [
+        [
+          {
+            "node": "find_token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "find_token": {
+      "main": [
+        [
+          {
+            "node": "token_if",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "token_if": {
+      "main": [
+        [
+          {
+            "node": "encrypt_password",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "update_failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "password_json": {
+      "main": [
+        [
+          {
+            "node": "update_password",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "encrypt_password": {
+      "main": [
+        [
+          {
+            "node": "find_user_1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "find_user_1": {
+      "main": [
+        [
+          {
+            "node": "password_json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "update_password": {
+      "main": [
+        [
+          {
+            "node": "delete_url",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "delete_url": {
+      "main": [
+        [
+          {
+            "node": "update_success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": true,
+  "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "90423aaa-194c-46a4-a1bf-65a4bda2acf6",
+  "versionId": "56dfc4e4-1114-459f-a4db-278cc5b625ac",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "4a854ad628bcbb5d5687b283c7b55ceddf8fffc3be5325d1154fc6a61885431b"
