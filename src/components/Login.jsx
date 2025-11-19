@@ -97,7 +97,7 @@ let Login = () => {
                 </label>
                 <a
                   className="text-sm font-medium text-[var(--brand-blue)] hover:underline"
-                  href="#"
+                  href="http://192.168.31.217:5678/form/reset-request"
                 >
                   Forgot?
                 </a>

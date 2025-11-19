@@ -22,6 +22,11 @@ let Settings = () => {
     navigate('/login')
   }
 
+  let resetPassword = () => {
+    localStorage.clear('spendwise_token')
+    window.location.href = "http://192.168.31.217:5678/form/reset-request"
+  }
+
   return(
     <div className="bg-[#f6f7f8] dark:bg-[#101922] font-display">
       <div className="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
@@ -72,7 +77,7 @@ let Settings = () => {
             Account
           </h2>
           <div className="space-y-2">
-            <div className="flex items-center gap-4 bg-white dark:bg-[#2C5282]/20 p-4 rounded-xl justify-between">
+            <div className="flex items-center gap-4 bg-white dark:bg-[#2C5282]/20 p-4 rounded-xl justify-between" onClick={resetPassword}>
               <div className="flex items-center gap-4">
                 <div className="text-[#38A169] flex items-center justify-center rounded-lg bg-[#38A169]/20 shrink-0 size-10">
                   <span className="material-symbols-outlined">lock_reset</span>
@@ -87,7 +92,7 @@ let Settings = () => {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-4 bg-white dark:bg-[#2C5282]/20 p-4 rounded-xl justify-between">
+            <div className="flex items-center gap-4 bg-white dark:bg-[#2C5282]/20 p-4 rounded-xl justify-between" onClick={() => navigate('/signup')}>
               <div className="flex items-center gap-4">
                 <div className="text-[#38A169] flex items-center justify-center rounded-lg bg-[#38A169]/20 shrink-0 size-10">
                   <span className="material-symbols-outlined">person_add</span>
